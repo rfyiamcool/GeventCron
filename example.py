@@ -14,6 +14,10 @@ def func_2():
 def func_3():
     time.sleep(2)
 
+#尽量别用堵塞的模块,可以用grequests
+def block():
+    requests.get("http://www.google.com/")
+
 if __name__ == "__main__":
     scheduler = geventcron.Scheduler(logger_name='task_scheduler')
     scheduler.schedule('task_1', geventsheduler.every_second(4), func_1)
