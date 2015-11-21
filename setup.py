@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name='geventcron',
-    version='1.2',
+    version='1.3',
     description='Gevent Crontab Scheduler',
     long_description=open('README.md').read(),
     keywords = ["gevent cron scheduler","fengyun"],
