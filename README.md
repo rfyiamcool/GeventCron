@@ -3,7 +3,7 @@
 ### 原理:
 gevent有个spawn_later()函数，专为定时任务打造...  
 
-他的缺点就是，别让gevent调度堵塞了....尽量让你业务逻辑，采用gevent patch模块
+他的`缺点`就是，别让gevent调度堵塞了....尽量让你业务逻辑，采用gevent patch模块
 
 正在尝试下，借助spawn_later周期功能，解决堵塞的问题, [查看更多GeventCron相关信息](http://xiaorui.cc)
 
