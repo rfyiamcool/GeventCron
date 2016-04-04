@@ -4,23 +4,29 @@ import types
 import logging
 import time
 from datetime import timedelta, datetime
+
 import gevent
 from gevent.pool import Pool
 from gevent import monkey
+from crontab import CronTab
 monkey.patch_all()
 
-def every_second(seconds):
-    delta = timedelta(seconds=seconds)
-    while 1:
-        yield delta
 
-def wait_until(time_label):
-    if time_label == 'next_minute':
-        gevent.sleep(60 - int(time.time()) % 60)
-    elif time_label == 'next_hour':
-        gevent.sleep(3600 - int(time.time()) % 3600)
-    elif time_label == 'tomorrow':
-        gevent.sleep(86400 - int(time.time()) % 86400)
+class Interval(object):
+    def __init__(self,zt):
+        self.is_seconds = False
+        if isinstance(zt,int):
+            self.per = int(zt)
+            self.is_seconds = True
+        else:
+            self.per = CronTab(zt)
+        self.started = True
+
+    def next(self):
+        if self.is_seconds:
+            return self.per
+        return self.per.next()
+
 
 class Task(object):
     def __init__(self, name, action, timer, *args, **kwargs):
@@ -29,6 +35,7 @@ class Task(object):
         self.timer = timer
         self.args = args
         self.kwargs = kwargs
+
 
 class Scheduler(object):
     '''
@@ -72,30 +79,15 @@ class Scheduler(object):
 
     def run(self, task):
         self._remove_dead_greenlet(task.name)
-        if isinstance(task.timer, types.GeneratorType):
-            greenlet_ = gevent.spawn(task.action, *task.args, **task.kwargs)
-            self.active[task.name].append(greenlet_)
-            try:
-                greenlet_later = gevent.spawn_later(task.timer.next().total_seconds(), self.run, task)
-                self.waiting[task.name].append(greenlet_later)
-                return greenlet_, greenlet_later
-            except StopIteration:
-                pass
-            return greenlet_, None
-        # Class based timer
+        greenlet_ = gevent.spawn(task.action, *task.args, **task.kwargs)
+        self.active[task.name].append(greenlet_)
         try:
-            if task.timer.started is False:
-                delay = task.timer.next().total_seconds()
-                gevent.sleep(delay)
-                greenlet_ = gevent.spawn(task.action, *task.args, **task.kwargs)
-                self.active[task.name].append(greenlet_)
-            else:
-                greenlet_ = gevent.spawn(task.action, *task.args, **task.kwargs)
-                self.active[task.name].append(greenlet_)
-            greenlet_later = gevent.spawn_later(task.timer.next().total_seconds(), self.run, task)
+            greenlet_later = gevent.spawn_later(task.timer.next(), self.run, task)
             self.waiting[task.name].append(greenlet_later)
             return greenlet_, greenlet_later
         except StopIteration:
+            pass
+        except Exception,e:
             pass
         return greenlet_, None
 
@@ -106,10 +98,6 @@ class Scheduler(object):
         return pool
 
     def run_forever(self, start_at='once'):
-        if start_at not in ('once', 'next_minute', 'next_hour', 'tomorrow'):
-            raise ValueError("start_at : 'once', 'next_minute', 'next_hour', 'tomorrow'")
-        if start_at != 'once':
-            wait_until(start_at)
         try:
             task_pool = self.run_tasks()
             while self.running:
