@@ -1,13 +1,14 @@
 #coding:utf-8
-import geventcron
-from datetime import datetime
-import time
+
 import os
 import requests
 import threading
 import functools
+from datetime import datetime
+import time
 
-import threading
+import geventcron
+
 
 def async(func):
     @functools.wraps(func)
@@ -35,4 +36,7 @@ if __name__ == "__main__":
     scheduler.schedule('task_1', geventcron.Interval("*/1 * * * *"), func_1)
     scheduler.schedule('task_2', geventcron.Interval(2), func_2)
     scheduler.schedule('task_3', geventcron.Interval(3), func_3)
-    scheduler.run_forever(start_at='once')
+    # scheduler.run_forever()
+    scheduler.daemon(flag=True)
+    print "daemon"
+    time.sleep(100)

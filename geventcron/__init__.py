@@ -1,5 +1,5 @@
 # coding: utf-8
-
+import threading
 import types
 import logging
 import time
@@ -97,11 +97,18 @@ class Scheduler(object):
             pool.spawn(self.run, task)
         return pool
 
-    def run_forever(self, start_at='once'):
+    def daemon(self,flag=False):
+        if flag:
+            self.run_forever
+        else:
+            my_thread = threading.Thread(target=self.run_forever)
+            my_thread.start()
+
+    def run_forever(self):
         try:
             task_pool = self.run_tasks()
             while self.running:
-                gevent.sleep(seconds=1)
+                gevent.sleep(seconds=0.1)
             task_pool.join(timeout=30)
             task_pool.kill()
         except KeyboardInterrupt:
