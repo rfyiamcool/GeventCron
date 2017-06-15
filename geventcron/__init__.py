@@ -1,9 +1,8 @@
 # coding: utf-8
 import threading
-import types
+# import types
 import logging
-import time
-from datetime import timedelta, datetime
+
 
 import gevent
 from gevent.pool import Pool
@@ -13,9 +12,9 @@ monkey.patch_all()
 
 
 class Interval(object):
-    def __init__(self,zt):
+    def __init__(self, zt):
         self.is_seconds = False
-        if isinstance(zt,int):
+        if isinstance(zt, int):
             self.per = int(zt)
             self.is_seconds = True
         else:
@@ -87,7 +86,7 @@ class Scheduler(object):
             return greenlet_, greenlet_later
         except StopIteration:
             pass
-        except Exception,e:
+        except Exception:
             pass
         return greenlet_, None
 
@@ -97,7 +96,7 @@ class Scheduler(object):
             pool.spawn(self.run, task)
         return pool
 
-    def daemon(self,flag=False):
+    def daemon(self, flag=False):
         if flag:
             self.run_forever
         else:

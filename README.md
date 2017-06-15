@@ -7,6 +7,15 @@ gevent有个spawn_later()函数，专为定时任务打造...
 
 正在尝试下，借助spawn_later周期功能，解决堵塞的问题, [查看更多GeventCron相关信息](http://xiaorui.cc)
 
+### 安装方法:
+```
+pip install geventcron
+
+or
+
+python setup.py install
+```
+
 ### 使用方法:
 
 ```
