@@ -10,12 +10,12 @@ gevent有个spawn_later()函数，专为定时任务打造...
 ### 使用方法:
 
 ```
-import os
+import time
 import requests
 import threading
 import functools
 from datetime import datetime
-import time
+
 
 import geventcron
 
@@ -27,19 +27,24 @@ def async(func):
         my_thread.start()
     return wrapper
 
+
 @async
 def func_1():
     print 'Call func_1'
 
+
 def func_2():
     print 'Call func_2'
+
 
 def func_3():
     print 'Call func_3'
 
+
 #尽量别用堵塞的模块,可以用grequests
 def block():
     requests.get("http://www.google.com/")
+
 
 if __name__ == "__main__":
     scheduler = geventcron.Scheduler(logger_name='task_scheduler')
